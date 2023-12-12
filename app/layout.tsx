@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <GlobalStylesProvider>
           <Sidebar />
-          {children}
+          <div className="w-full">{children}</div>
         </GlobalStylesProvider>
         <Footer />
       </body>
