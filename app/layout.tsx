@@ -5,6 +5,7 @@ import "./globals.css";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import GlobalStylesProvider from "./providers/GlobalStylesProvider";
 import Footer from "./Components/Footer/Footer";
+import { Providers } from "@/redux/provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,8 +23,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <GlobalStylesProvider>
-          <Sidebar />
-          <div className="w-full">{children}</div>
+          {/* <Sidebar />
+          <div className="w-full">{children}</div> */}
+
+          <Providers>{children}</Providers>
         </GlobalStylesProvider>
         <Footer />
       </body>

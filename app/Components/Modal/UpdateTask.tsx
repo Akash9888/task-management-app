@@ -20,7 +20,11 @@ import categories from "@/app/Utils/categories";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Paper } from "@mui/material";
-import { useCreateTaskMutation } from "@/redux/services/noteApi";
+import {
+  useCreateTaskMutation,
+  useGetTaskByIdMutation,
+  useUpdateTaskByIdMutation,
+} from "@/redux/services/noteApi";
 
 import { usePathname, useRouter } from "next/navigation";
 
@@ -32,6 +36,19 @@ interface FormValues {
   category: string;
   description: string;
 }
+interface Props {
+  task: {
+    id: number;
+    title: string;
+    category: string;
+    description: string;
+    createdAt: Date;
+    isCompleted: boolean;
+    completedDate: Date;
+  };
+  refetchTasks: () => void;
+  onClose: () => void; // Function to refetch tasks after deletion
+}
 
 // yup schema
 const schema = yup.object().shape({
@@ -40,43 +57,63 @@ const schema = yup.object().shape({
   description: yup.string().required("*Description is a required field"),
 });
 
-export default function CreateTask() {
-  const [createTask, { isLoading, isError, error, isSuccess }] =
-    useCreateTaskMutation();
+export default function CreateTask({ task, refetchTasks, onClose }: Props) {
+  console.log(task);
+  // const {
+  //   isLoading: sDataLoading,
+  //   isFetching,
+  //   data: tasks,
+  //   error,
+  //   refetch,
+  // } = useGetTaskByIdMutation();
+  // React.useEffect(() => {
+  //   getTaskById()
+  // },[])
+  // console.log("update data", tasks);
+
+  const [updateTaskById] = useUpdateTaskByIdMutation();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver: yupResolver(schema) });
-  const router = useRouter();
-  React.useEffect(() => {
-    if (isSuccess) {
-      console.log("Success blok");
-      router.push("/");
-    }
+  // const router = useRouter();
+  // React.useEffect(() => {
+  //   if (isSuccess) {
+  //     console.log("Success blok");
+  //     router.push("/");
+  //   }
 
-    // if (isError) {
+  //   // if (isError) {
 
-    // }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  //   // }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isLoading]);
 
   const onSubmit = async (data: FormValues) => {
-    console.log(data);
-    createTask(data);
-    console.log("Form submission");
+    try {
+      await updateTaskById({
+        id: task.id,
+        data,
+      });
+      refetchTasks();
+      onClose(); // After successful deletion, refetch tasks
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component={Paper} elevation={6} maxWidth="xs" className=" ">
         <CssBaseline />
+        <h1>Update Your Note</h1>
         <Box className="flex flex-col items-center p-5 mt-4">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <TaskOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Create a New Task
+            Update Your Task
           </Typography>
           <Box
             component="form"
@@ -92,6 +129,7 @@ export default function CreateTask() {
               required
               fullWidth
               maxRows={2}
+              defaultValue={task.title}
               {...register("title")}
               className=""
             />
@@ -104,7 +142,7 @@ export default function CreateTask() {
               id="category"
               select
               label="Category"
-              defaultValue="Others"
+              defaultValue={task.category}
               fullWidth
               {...register("category")}
               className="my-3"
@@ -127,6 +165,7 @@ export default function CreateTask() {
               multiline
               rows={4}
               fullWidth
+              defaultValue={task.description}
               {...register("description")}
               className=""
             />
@@ -137,14 +176,14 @@ export default function CreateTask() {
             )}
 
             <Button variant="outlined" type="submit" fullWidth className="my-4">
-              Save Task
+              Update Task
             </Button>
-            {isError && (
+            {/* {isError && (
               <p className="text-red-500 font-medium ">Erroooo.........</p>
             )}
             {isLoading && (
               <p className="text-red-500 font-medium ">Loading.........</p>
-            )}
+            )} */}
           </Box>
         </Box>
       </Container>
